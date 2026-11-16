@@ -1,0 +1,8 @@
+POWER BI interview questions
+=============================
+1.Why do we use a primary key in a database or data model?
+"A primary key is a column that uniquely identifies each record in a table. It must contain unique values and cannot contain duplicate or NULL values."
+
+Which table should be placed at the centre of the Star Schema, and why?
+"FactSales is placed at the centre of a Star Schema because it stores transactional data, including numerical measures such as Sales, Profit and Quantity. It connects to dimension tables such as Product, Region and Date through foreign keys."
+

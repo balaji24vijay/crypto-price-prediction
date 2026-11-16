@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CryptoVault Forecast</title>
+<style>
+body { font-family: Arial, sans-serif; background: #080b14; color: white; margin: 0; padding: 24px; }
+.card { background: #111725; border: 1px solid #30374b; border-radius: 16px; padding: 20px; margin: 0 auto 18px; max-width: 1100px; }
+.coins { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.coins label { padding: 14px; border: 1px solid #30374b; border-radius: 10px; }
+.chart { display: block; width: 100%; }
+button { padding: 12px 18px; border: 0; border-radius: 10px; background: #35d6b2; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="card">
+<p><a href="{{ url_for('logout') }}">Sign out</a></p>
+<h1>CryptoVault Forecast</h1>
+<p>Welcome, {{ username }}. Select up to five cryptocurrencies.</p>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<p>{{ message }}</p>{% endfor %}
+{% endwith %}
+<form method="post">
+<div class="coins">
+{% for coin in coins %}
+<label><input type="checkbox" name="coins" value="{{ coin }}" {% if coin in selected %}checked{% endif %}> {{ coin }} / USD</label>
+{% endfor %}
+</div>
+<p><button type="submit">Generate forecasts</button></p>
+</form>
+</div>
+{% for error in errors %}<div class="card"><strong>Error:</strong> {{ error }}</div>{% endfor %}
+{% for result in results %}
+<div class="card">
+<h2>{{ result.symbol }} / USD</h2>
+<p>{{ result.model }} - Next hour: &#36;{{ result.next_price }} ({{ result.change }}%)</p>
+<img class="chart" src="{{ result.graph }}" alt="{{ result.symbol }} forecast">
+<p>Range: &#36;{{ result.low }} - &#36;{{ result.high }}</p>
+</div>
+{% endfor %}
+<div class="card"><p>Forecasts cover {{ horizon }} hours. Educational estimates only.</p></div>
+</body>
+</html>

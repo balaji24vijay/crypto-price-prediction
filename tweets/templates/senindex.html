@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CryptoVault Sentiment</title>
+  <style>
+    :root { --bg:#080b14; --panel:#111725; --line:#30374b; --text:#f5f7ff; --muted:#8f99ad; --teal:#35d6b2; --red:#ff6b83; --purple:#8b7cff; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--text); font-family:Arial,sans-serif; background:radial-gradient(circle at 15% 0%,rgba(139,124,255,.22),transparent 34rem),var(--bg); }
+    a { color:inherit; text-decoration:none; }
+    .shell { width:min(1100px,calc(100% - 32px)); margin:auto; padding:30px 0 60px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-bottom:36px; }
+    h1 { margin:0; font-size:clamp(28px,5vw,46px); }
+    header p { margin:8px 0 0; color:var(--muted); }
+    .back { padding:10px 14px; border:1px solid var(--line); border-radius:10px; color:var(--muted); }
+    .back:hover { color:var(--text); border-color:var(--purple); }
+    .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:18px; }
+    .card,.chart-card { background:rgba(17,23,37,.9); border:1px solid var(--line); border-radius:18px; padding:22px; }
+    .card span { color:var(--muted); font-size:13px; }
+    .count { display:block; margin:12px 0 4px; font-size:40px; font-weight:700; }
+    .positive .count { color:var(--teal); } .negative .count { color:var(--red); } .neutral .count { color:#b9c0cf; }
+    .percent { color:var(--muted); font-size:13px; }
+    .chart-card h2 { margin:0 0 5px; font-size:21px; }
+    .chart-card p { color:var(--muted); margin:0 0 18px; }
+    .chart { display:block; width:100%; border:1px solid var(--line); border-radius:12px; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px; }
+    .stat { padding:13px; border-radius:10px; background:rgba(255,255,255,.04); }
+    .stat span { display:block; color:var(--muted); font-size:12px; margin-bottom:6px; }
+    .stat strong { font-size:20px; }
+    @media(max-width:650px) { header { align-items:flex-start; flex-direction:column; } .cards,.stats { grid-template-columns:1fr; } .shell { width:calc(100% - 22px); } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div><h1>Market sentiment</h1><p>What the conversation is saying across the supplied crypto posts.</p></div>
+      <a class="back" href="{{ url_for('dashboard') }}">Back to forecast</a>
+    </header>
+    <section class="cards">
+      <article class="card positive"><span>Positive posts</span><strong class="count">{{ positive }}</strong><span class="percent">{{ percentages.positive }} percent of total</span></article>
+      <article class="card negative"><span>Negative posts</span><strong class="count">{{ negative }}</strong><span class="percent">{{ percentages.negative }} percent of total</span></article>
+      <article class="card neutral"><span>Neutral posts</span><strong class="count">{{ neutral }}</strong><span class="percent">{{ percentages.neutral }} percent of total</span></article>
+    </section>
+    <section class="chart-card">
+      <h2>Sentiment distribution</h2>
+      <p>Analysis uses VADER when its local corpus is available and an offline keyword fallback otherwise.</p>
+      <img class="chart" src="{{ chart }}" alt="Sentiment distribution chart">
+      <div class="stats">
+        <div class="stat"><span>Total analyzed</span><strong>{{ total }}</strong></div>
+        <div class="stat"><span>Market mood</span><strong>{{ mood }}</strong></div>
+        <div class="stat"><span>Data source</span><strong>crypto.csv</strong></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

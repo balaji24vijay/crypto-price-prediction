@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Crypto — Sign In</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons/favicon.ico') }}" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+
+  <!-- Original vendor CSS (kept for any shared pages) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/util.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --pink:        #fa4299;
+      --purple:      #a445b2;
+      --mid:         #d41872;
+      --grad:        linear-gradient(135deg, var(--purple) 0%, var(--mid) 55%, var(--pink) 100%);
+      --page-bg:     #080810;
+      --card-bg:     rgba(255 255 255 / 0.04);
+      --card-border: rgba(255 255 255 / 0.09);
+      --input-bg:    rgba(255 255 255 / 0.06);
+      --text:        #ffffff;
+      --text-muted:  rgba(255 255 255 / 0.40);
+      --text-faint:  rgba(255 255 255 / 0.18);
+      --danger:      #f87171;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Animated background ── */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255 255 255 / 0.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255 255 255 / 0.022) 1px, transparent 1px);
+      background-size: 52px 52px;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.28;
+      will-change: transform;
+    }
+    .orb-1 {
+      width: 520px; height: 520px;
+      background: var(--purple);
+      top: -140px; left: -100px;
+      animation: drift-1 11s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: var(--pink);
+      bottom: -80px; right: -60px;
+      animation: drift-2 14s ease-in-out infinite;
+    }
+    .orb-3 {
+      width: 240px; height: 240px;
+      background: #1a053a;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: drift-3 18s ease-in-out infinite;
+    }
+
+    @keyframes drift-1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(28px,40px)} }
+    @keyframes drift-2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,-20px)} }
+    @keyframes drift-3 { 0%,100%{transform:translate(-50%,-50%)} 50%{transform:translate(-44%,-58%)} }
+
+    /* Floating coin particles */
+    .particles { position: absolute; inset: 0; pointer-events: none; }
+    .particle {
+      position: absolute;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--grad);
+      opacity: 0;
+      animation: float-up linear infinite;
+    }
+    @keyframes float-up {
+      0%   { opacity: 0;   transform: translateY(0) scale(0.5); }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.2; }
+      100% { opacity: 0;   transform: translateY(-70vh) scale(1.2); }
+    }
+
+    /* ── Page layout ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ── Left panel (branding) ── */
+    .panel-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 64px;
+      border-right: 1px solid var(--card-border);
+      position: relative;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 64px;
+    }
+    .brand-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: var(--grad);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 28px rgba(212,24,114,0.4);
+      flex-shrink: 0;
+    }
+    .brand-icon svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-headline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(32px, 3.5vw, 52px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+    .panel-headline span {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .panel-sub {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 380px;
+      margin-bottom: 48px;
+    }
+
+    /* Stats row */
+    .stats {
+      display: flex;
+      gap: 32px;
+    }
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* Floating coin badge */
+    .coin-badge {
+      position: absolute;
+      bottom: 40px; right: -1px;
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--card-border);
+      border-right: none;
+      border-radius: 16px 0 0 16px;
+      padding: 12px 20px;
+      backdrop-filter: blur(12px);
+      animation: badge-pulse 3s ease-in-out infinite;
+    }
+    @keyframes badge-pulse {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-4px); }
+    }
+    .coin-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+    .coin-badge-text { font-size: 13px; color: var(--text-muted); }
+    .coin-badge-text strong { color: #22c55e; }
+
+    /* ── Right panel (form) ── */
+    .panel-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 60px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 48px 40px 40px;
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      animation: card-rise 0.65s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes card-rise {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--pink);
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 32px;
+    }
+
+    /* Flash messages from Flask */
+    .flash {
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--danger);
+      margin-bottom: 20px;
+    }
+
+    /* ── Form fields ── */
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .field-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .field-icon {
+      position: absolute;
+      left: 14px;
+      pointer-events: none;
+      color: rgba(255,255,255,0.22);
+      width: 16px; height: 16px;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 13px 14px 13px 44px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .field input::placeholder { color: var(--text-faint); }
+    .field input:focus {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(212,24,114,0.65);
+      box-shadow: 0 0 0 4px rgba(212,24,114,0.12);
+    }
+
+    .toggle-pass {
+      position: absolute;
+      right: 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+    .toggle-pass:hover { color: var(--text); }
+    .toggle-pass svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+    /* ── Row below password ── */
+    .form-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      margin-top: -4px;
+    }
+
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .remember input[type="checkbox"] {
+      appearance: none;
+      width: 16px; height: 16px;
+      border-radius: 4px;
+      border: 1px solid var(--card-border);
+      background: var(--input-bg);
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .remember input[type="checkbox"]:checked {
+      background: var(--grad);
+      border-color: transparent;
+    }
+    .remember input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 4px; top: 1px;
+      width: 5px; height: 8px;
+      border: 2px solid #fff;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg);
+    }
+    .remember span { font-size: 13px; color: var(--text-muted); }
+
+    .forgot-link {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .forgot-link:hover { color: var(--pink); }
+
+    /* ── Submit button ── */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      background: var(--grad);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(212,24,114,0.35);
+      letter-spacing: 0.01em;
+      margin-bottom: 24px;
+    }
+    .btn-submit::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(212,24,114,0.5); }
+    .btn-submit:hover::after { background: rgba(255,255,255,0.07); }
+    .btn-submit:active { transform: scale(0.98); }
+
+    /* Loading state */
+    .btn-submit.loading { opacity: 0.7; pointer-events: none; }
+    .btn-submit .spinner {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+    .btn-submit.loading .btn-label { display: none; }
+    .btn-submit.loading .spinner   { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 18px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px; background: rgba(255,255,255,0.07);
+    }
+    .divider span { font-size: 12px; color: var(--text-faint); white-space: nowrap; }
+
+    /* ── Social buttons ── */
+    .social-row { display: flex; gap: 10px; margin-bottom: 28px; }
+    .btn-social {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 11px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+    }
+    .btn-social:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.2);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+    .btn-social svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* ── Footer ── */
+    .card-footer {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .card-footer a {
+      color: var(--pink);
+      text-decoration: none;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+    .card-footer a:hover { opacity: 0.75; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .page { grid-template-columns: 1fr; }
+      .panel-left { display: none; }
+      .panel-right { padding: 24px 16px; }
+    }
+    @media (max-width: 480px) {
+      .card { padding: 40px 22px 32px; border-radius: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated background -->
+  <div class="bg" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="particles" id="particles"></div>
+  </div>
+
+  <!-- Two-column layout -->
+  <div class="page">
+
+    <!-- ── Left panel ── -->
+    <aside class="panel-left" aria-label="Brand panel">
+      <div class="brand-logo">
+        <div class="brand-icon">
+          <!-- Bitcoin / crypto icon -->
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <span class="brand-name">CryptoVault</span>
+      </div>
+
+      <h1 class="panel-headline">
+        Trade smarter.<br>
+        <span>Earn faster.</span>
+      </h1>
+
+      <p class="panel-sub">
+        The professional-grade crypto trading platform trusted by over 2 million traders worldwide. Real-time data, zero hidden fees.
+      </p>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-value">$4.2B+</span>
+          <span class="stat-label">Volume traded</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">2M+</span>
+          <span class="stat-label">Active users</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">150+</span>
+          <span class="stat-label">Coins listed</span>
+        </div>
+      </div>
+
+      <!-- Live indicator badge -->
+      <div class="coin-badge" aria-label="Market status">
+        <div class="coin-dot"></div>
+        <span class="coin-badge-text">BTC/USD &nbsp;<strong>↑ +2.4%</strong> &nbsp;Live</span>
+      </div>
+    </aside>
+
+    <!-- ── Right panel (form) ── -->
+    <main class="panel-right">
+      <div class="card">
+
+        <p class="card-eyebrow">Welcome back</p>
+        <h2 class="card-title">Sign in to your account</h2>
+
+        <!-- Flask flash messages -->
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for msg in messages %}
+              <div class="flash" role="alert">{{ msg }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form action="/signin" method="post" id="loginForm" novalidate>
+
+          <!-- Username -->
+          <div class="field" id="field-user">
+            <label for="user">Username</label>
+            <div class="field-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <input
+                type="text"
+                id="user"
+                name="user"
+                placeholder="Enter your username"
+                autocomplete="username"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="field" id="field-password">
+            <label for="password">Password</label>
+            <div class="field-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+              />
+              <button type="button" class="toggle-pass" id="togglePass" aria-label="Show password">
+                <svg id="eye-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Remember + Forgot -->
+          <div class="form-meta">
+            <label class="remember">
+              <input type="checkbox" name="remember" id="remember" />
+              <span>Remember me</span>
+            </label>
+            <a href="/forgot" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <span class="btn-label">Sign In &nbsp;→</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+
+        </form>
+
+        <!-- Social login -->
+        <div class="divider"><span>or sign in with</span></div>
+
+        <div class="social-row">
+          <button type="button" class="btn-social" aria-label="Sign in with Google">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Google
+          </button>
+
+          <button type="button" class="btn-social" aria-label="Sign in with GitHub">
+            <svg viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
+              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+            </svg>
+            GitHub
+          </button>
+        </div>
+
+        <!-- Sign-up link -->
+        <p class="card-footer">
+          Don't have an account? <a href="/logon">Create one free</a>
+        </p>
+
+      </div>
+    </main>
+
+  </div><!-- /.page -->
+
+
+  <!-- Scripts (original vendor stack preserved) -->
+  <script src="{{ url_for('static', filename='vendor/jquery/jquery-3.2.1.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/animsition/js/animsition.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/bootstrap/js/popper.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/select2/select2.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/daterangepicker/moment.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/daterangepicker/daterangepicker.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/countdowntime/countdowntime.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <script>
+    /* ── Floating particles ── */
+    const container = document.getElementById('particles');
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.cssText = `
+        left:${Math.random() * 100}%;
+        bottom:${Math.random() * 20}%;
+        width:${4 + Math.random() * 5}px;
+        height:${4 + Math.random() * 5}px;
+        animation-duration:${8 + Math.random() * 14}s;
+        animation-delay:${Math.random() * 10}s;
+      `;
+      container.appendChild(p);
+    }
+
+    /* ── Password toggle ── */
+    const toggleBtn = document.getElementById('togglePass');
+    const passInput = document.getElementById('password');
+    const eyeOpen   = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+    const eyeSlash  = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+    const eyeIcon   = document.getElementById('eye-icon');
+
+    toggleBtn.addEventListener('click', () => {
+      const shown = passInput.type === 'text';
+      passInput.type = shown ? 'password' : 'text';
+      eyeIcon.innerHTML = shown ? eyeOpen : eyeSlash;
+      toggleBtn.setAttribute('aria-label', shown ? 'Show password' : 'Hide password');
+    });
+
+    /* ── Form submit loading state ── */
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      const user = document.getElementById('user').value.trim();
+      const pass = document.getElementById('password').value;
+      if (!user || !pass) return; // let browser handle required
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading');
+    });
+  </script>
+
+</body>
+</html>
